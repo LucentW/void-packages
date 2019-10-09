@@ -1,0 +1,32 @@
+# Template file for 'rtl8723bu-dkms'
+pkgname=rtl8723bu-dkms
+version=4.3.16
+revision=1
+_gitrev=297addb17c94c328849570a05203ad93a58ad705
+archs=noarch
+wrksrc="rtl8723bu-${_gitrev}"
+depends="dkms"
+short_desc="Realtek 8723BU USB WiFi driver (DKMS)"
+maintainer="Orphaned <orphan@voidlinux.org>"
+license="GPL-2.0-only"
+homepage="https://www.tp-link.com"
+distfiles="https://github.com/lwfinger/rtl8723bu/archive/${_gitrev}.tar.gz"
+checksum=1bbb1a1749d771c1a6c60b6358bbdf49a2ee04005903c6ec81fb157c64f837c3
+dkms_modules="8723bu ${version}"
+
+do_install() {
+	vmkdir /usr/src/8723bu-${version}
+	vcopy "*" usr/src/8723bu-${version}
+	vinstall ${FILESDIR}/dkms.conf 644 usr/src/8723bu-${version}
+	sed -i -e "s/@VERSION@/${version}-${revision}/" ${PKGDESTDIR}/usr/src/8723bu-${version}/dkms.conf
+
+	# modules-load.d(5) file.
+	vmkdir usr/lib/modules-load.d
+	echo "8723bu" > ${DESTDIR}/usr/lib/modules-load.d/8723bu.conf
+	chmod 644 ${DESTDIR}/usr/lib/modules-load.d/8723bu.conf
+
+	# blacklist 8xxxbu driver
+	vmkdir usr/lib/modprobe.d
+	echo "blacklist rtl8xxxu" > ${DESTDIR}/usr/lib/modprobe.d/8723bu.conf
+	chmod 644 ${DESTDIR}/usr/lib/modprobe.d/8723bu.conf
+}
